@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wisata_candi_2627_51/providers/auth_provider.dart';
+import 'package:flutter_wisata_candi_2627_51/providers/favorite_provider.dart';
+import 'package:flutter_wisata_candi_2627_51/screens/sign_in_screen.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,24 +12,11 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  //Todo 1 variabel
-  bool isSignedIn= false;
-  String fullName="Rachmadi.";
-  String userName="Rachmadi";
-  int favoriteCandiCount=0;
-
-  void signIn(){
-    setState((){
-      isSignedIn = true;
-    });
-  }
-    void signOut(){
-    setState((){
-      isSignedIn = false;
-    });
-  }
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final favoriteCount = context.watch<FavoriteProvider>().count;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -54,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundImage: AssetImage('images/placeholder_image.png'),
                         ),
                       ),
-                      if(isSignedIn)
+                      if (auth.isSignedIn)
                         IconButton(
                           onPressed: () {
                             
@@ -75,7 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text("Pengguna", style: TextStyle(fontSize: 18 , fontWeight: FontWeight.bold),)
                     ],)
                   ),
-                  Expanded(child: Text(' : $userName', style: TextStyle(fontSize: 18),))
+                  Expanded(
+                    child: Text(
+                      ' : ${auth.username}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  )
                 ],
               ),
               SizedBox(height: 4,),
@@ -90,8 +86,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text("Nama", style: TextStyle(fontSize: 18 , fontWeight: FontWeight.bold),)
                     ],)
                   ),
-                  Expanded(child: Text(' : $fullName', style: TextStyle(fontSize: 18),)),
-                  if(isSignedIn) const Icon(Icons.edit)
+                  const Expanded(
+                    child: Text(' : Rachmadi.', style: TextStyle(fontSize: 18)),
+                  ),
+                  if (auth.isSignedIn) const Icon(Icons.edit)
                 ],
               ),
               SizedBox(height: 4,),
@@ -106,15 +104,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text("Favorit", style: TextStyle(fontSize: 18 , fontWeight: FontWeight.bold),)
                     ],)
                   ),
-                  Expanded(child: Text(' : $favoriteCandiCount', style: TextStyle(fontSize: 18),))
+                  Expanded(child: Text(favoriteCount > 0 ? '$favoriteCount' : '', style: TextStyle(fontSize: 18),))
                 ],
               ),
               SizedBox(height: 4,),
               Divider(color: Colors.deepPurple,),
               SizedBox(height: 16,),
-              isSignedIn 
-              ? TextButton(onPressed: () { signOut();}, child: const Text('Signed Out'))
-              : TextButton(onPressed: () { signIn();}, child: const Text('Signed In'))
+              auth.isSignedIn
+                  ? TextButton(
+                      onPressed: () {
+                        context.read<AuthProvider>().signOut();
+                        context.read<FavoriteProvider>().clearAll();
+                      },
+                      child: const Text('Sign Out'),
+                    )
+                  : TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SignInScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text('Sign In'),
+                    )
               //Todo 4 Profile Action
             ],
           ),

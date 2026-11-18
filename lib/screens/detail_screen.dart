@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wisata_candi_2627_51/models/candi.dart';
+import 'package:flutter_wisata_candi_2627_51/providers/favorite_provider.dart';
+import 'package:flutter_wisata_candi_2627_51/screens/profile_screen.dart';
+import 'package:provider/provider.dart';
 
 class DetailScreen extends StatelessWidget {
   final Candi candi;
@@ -8,7 +11,18 @@ class DetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFav = context.watch<FavoriteProvider>().isFavorite(candi.name);
+
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          );
+        },
+        child: const Icon(Icons.person),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -54,7 +68,7 @@ class DetailScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -66,8 +80,13 @@ class DetailScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.favorite_border),
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : null,
+                        ),
+                        onPressed: () {
+                          context.read<FavoriteProvider>().toggle(candi.name);
+                        },
                       ),
                     ],
                   ),
